@@ -1,0 +1,30 @@
+{
+    "name": "gromnan/async-mongodb",
+    "autoload": {
+        "psr-4": {
+            "MongoDB\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MongoDB\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jérôme Tamarelle",
+            "email": "jerome@tamarelle.net"
+        }
+    ],
+    "require": {
+        "ext-mongodb": "*",
+        "amphp/socket": "^2.2"
+    },
+    "require-dev": {
+        "mongodb/mongodb": "^1.16",
+        "symfony/phpunit-bridge": "^6.3"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
