@@ -11,9 +11,10 @@ class Query
 {
     private array|object $query;
 
+    private string $database;
     private array $options;
 
-    public function __construct(array|object $filter = [], array|null $queryOptions = null)
+    public function __construct(string $database, array|object $filter = [], array|null $queryOptions = null)
     {
         $queryOptions ??= [];
 
@@ -25,14 +26,18 @@ class Query
             throw InvalidArgumentException::expectedDocumentType('projection', $queryOptions['projection']);
         }
 
+        $this->database = $database;
         $this->query = $filter;
         $this->options = $queryOptions;
     }
 
     public function getMsg(): Msg
     {
+        $command = $this->query;
+        $command['$db'] = $this->database;
+
         return new Msg(
-            0,
+            $this->database,
             $this->query,
             $this->options,
         );

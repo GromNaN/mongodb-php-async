@@ -4,6 +4,8 @@ namespace MongoDB\Async;
 
 use Amp\Socket\Socket;
 use MongoDB\Async\Protocol\Msg;
+use MongoDB\Async\Protocol\Reply;
+use MongoDB\BSON\Document;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Exception\InvalidArgumentException;
 use function Amp\Socket\connect;
@@ -26,7 +28,7 @@ class Manager
         return $this->command($namespace, $query->getMsg(), $options);
     }
 
-    public function command(string $namespace, Msg $command, array $options = [])
+    public function command(string $namespace, Msg $command, array $options = []): Document
     {
         $readPreference = $this->getReadPreference($options);
 
@@ -38,13 +40,21 @@ class Manager
             'secondaryOk' => $readPreference->getMode() !== ReadPreference::RP_PRIMARY,
         ], $options);
 
-        return $this->write($command);
+        $this->write($command);
+
+        return $this->read()->getPayload();
     }
-    private function write(Msg $msg, array $options = [])
+
+    private function write(Msg $msg, array $options = []): void
     {
         $this->getSocket()->write($msg->toBin());
+    }
 
-        return $this->socket->read();
+    public function read(): Reply
+    {
+        $data = $this->socket->read();
+
+        return new Reply($data);
     }
 
     private function getReadPreference(array $options): ReadPreference

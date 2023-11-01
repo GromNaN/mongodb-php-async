@@ -12,7 +12,8 @@ use function MongoDB\BSON\fromPHP;
  */
 class Msg
 {
-    private const OP_MSG = 2013;
+    public const OP_MSG = 2013;
+    public const PAYLOAD_TYPE_DOCUMENT = 0;
     private static int $requestIdSequence = 0;
 
     private array $command;
@@ -44,11 +45,10 @@ class Msg
 
     public function toBin(): string
     {
-        // @todo check this 0 byte
-        $bson = "\0" . fromPHP($this->command);
-        $length = /* header */ 4 * 4 + /* flags */ 4 + strlen($bson);
+        $bson = fromPHP($this->command);
+        $length = /* header */ 4 * 4 + /* flags */ 4 + /* payload type */ 1 + strlen($bson);
 
-        $header = pack('V5', $length, $this->requestId, 0, self::OP_MSG, $this->options['flags']);
+        $header = pack('V5C', $length, $this->requestId, 0, self::OP_MSG, $this->options['flags'], self::PAYLOAD_TYPE_DOCUMENT);
 
         return $header . $bson;
     }
