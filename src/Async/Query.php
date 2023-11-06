@@ -12,8 +12,6 @@ class Query
     private array|object $query;
 
     private string $database;
-    private array $options;
-
     public function __construct(string $database, array|object $filter = [], array|null $queryOptions = null)
     {
         $queryOptions ??= [];
@@ -36,10 +34,6 @@ class Query
         $command = $this->query;
         $command['$db'] = $this->database;
 
-        return new Msg(
-            $this->database,
-            $this->query,
-            $this->options,
-        );
+        return new Msg($command);
     }
 }

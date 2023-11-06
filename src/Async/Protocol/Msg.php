@@ -16,8 +16,6 @@ class Msg
     public const PAYLOAD_TYPE_DOCUMENT = 0;
     private static int $requestIdSequence = 0;
 
-    private array $command;
-    private array $options;
     private int $requestId;
 
     /**
@@ -26,19 +24,11 @@ class Msg
      * @param array{requestId:int,maxBsonSize:int,moreToCome:bool,exhaustAllowed:bool,readPreference:ReadPreference} $options
      *
      */
-    public function __construct(string $databaseName, array $command, array $options = [])
-    {
-        $command['$db'] = $databaseName;
-
-        if (isset($options['readPreference'])) {
-            $command['$readPreference'] = $options['readPreference'];
-        }
-
-        $options['flags'] ??= 0;
-
-        $this->command = $command;
-        $this->options = $options;
-        $this->requestId = $options['requestId'] ?? self::nextRequestId();
+    public function __construct(
+        private array $command,
+        private int $flags = 0
+    ) {
+        $this->requestId = self::nextRequestId();
 
         // @todo https://github.dev/mongodb/node-mongodb-native/blob/f495abb0e25755e867b311a19c8cd35a4c606aa4/src/cmap/commands.ts#L508-L509
     }
@@ -48,7 +38,7 @@ class Msg
         $bson = fromPHP($this->command);
         $length = /* header */ 4 * 4 + /* flags */ 4 + /* payload type */ 1 + strlen($bson);
 
-        $header = pack('V5C', $length, $this->requestId, 0, self::OP_MSG, $this->options['flags'], self::PAYLOAD_TYPE_DOCUMENT);
+        $header = pack('V5C', $length, $this->requestId, 0, self::OP_MSG, $this->flags, self::PAYLOAD_TYPE_DOCUMENT);
 
         return $header . $bson;
     }

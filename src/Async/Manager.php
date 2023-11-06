@@ -32,14 +32,6 @@ class Manager
     {
         $readPreference = $this->getReadPreference($options);
 
-        // @todo session, clusterTime, readConcern, writeConcern
-        $options = array_merge([
-            'numberToSkip' => 0,
-            'numberToReturn' => -1,
-            'checkKeys' => false,
-            'secondaryOk' => $readPreference->getMode() !== ReadPreference::RP_PRIMARY,
-        ], $options);
-
         $this->write($command);
 
         return $this->read()->getPayload();
