@@ -38,7 +38,7 @@ final class Server
 
     public function executeCommand(string $db, Command $command, array|null $options = null): Cursor
     {
-        $document = $command->getDocument();
+        $document = array_merge($command->getDocument(), $command->getOptions(), $options ?? []);
         $document['$db'] = $db;
 
         $msg = new Msg($document);
@@ -101,6 +101,7 @@ final class Server
 
     private function write(Msg $msg, array $options = []): void
     {
+        //var_dump($msg);
         $this->socket->write($msg->toBin());
     }
 
